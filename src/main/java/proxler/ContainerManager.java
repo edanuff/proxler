@@ -7,10 +7,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.Container;
-import com.kpelykh.docker.client.model.Ports.Port;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.client.model.Container;
+import com.github.dockerjava.client.model.Container.Port;
 
 public class ContainerManager {
 
@@ -51,7 +51,7 @@ public class ContainerManager {
         if (tag == null) {
             return null;
         }
-        List<Container> containers = dockerClient.listContainers(true);
+        List<Container> containers = dockerClient.listContainersCmd().exec();
         if (containers == null) {
             return null;
         }
@@ -72,11 +72,8 @@ public class ContainerManager {
 
         int container_port = 0;
         try {
-            Port cport = container.getPorts().getAllPorts().values().iterator()
-                    .next();
-            cport.getHostIp();
-            container_port = Integer.parseInt(cport
-                    .getHostPort());
+            Port cport = container.getPorts()[0];
+            container_port = cport.getPublicPort();
 
         } catch (Exception e) {
             logger.error("Error getting container port", e);
